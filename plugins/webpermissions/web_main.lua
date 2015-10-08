@@ -306,7 +306,7 @@ local function GetPlugin(get_plugin, a_Request)
 					PermissionString = CommandInfo.Permission
 				end
 				
-				ins(Row, "<tr></td><td valign='top'>" .. CommandString .. "<br/></td><td valign='top'>" .. (PermissionString or ShowSubCommands(CommandInfo.Subcommands)) .. "<br/></td><td valign='top'>" .. (CommandInfo.HelpString or "") .. "<br/></td><td valign='top'>" .. AssignButton("assign", "Add Permission", PermissionString, CommandInfo.Subcommands, a_Request.Path) .. "</td></tr>")
+				ins(Row, "<tr></td><td valign='top'>" .. CommandString .. "<br/></td><td valign='top'>" .. (PermissionString or ShowSubCommands(CommandInfo.Subcommands)) .. "<br/></td><td valign='top'>" .. (CommandInfo.HelpString or "") .. "<br/></td><td valign='top'>" .. AssignButton("assign", "Assign Permission", PermissionString, CommandInfo.Subcommands, a_Request.Path) .. "</td></tr>")
 			end
 			ins(Row, "</tbody>")
 			ins(Row, "<tfoot><tr><th>Commands</th><th>Permissions</th><th>Help Strings</th><th>Assign to Group</th></tr></tfoot>")
@@ -363,6 +363,7 @@ local function GetGroupRow(a_GroupName, a_Request, Permission)
 	
 	if HasPermission then
 		HasPermission_TXT = "<span style='color: green'><b>YES</b></span>"
+		ShowButton = AssignButtonGroup("removeperm", "Remove Permission", Permission, a_GroupName, a_Request.Path)
 	else
 		HasPermission_TXT = "<span style='color: red'><b>NO</b></span>"
 		ShowButton = AssignButtonGroup("addperm", "Add Permission", Permission, a_GroupName, a_Request.Path)
@@ -415,12 +416,27 @@ local function AddPermission(a_Request)
 	return "<p>Permission added. <a href='/" .. a_Request.Path .. "?subpage=" .. "'>Return to group list</a>.</p>"
 end
 
+local function RemovePermission(a_Request)
+	-- Check params:
+	local Permission = a_Request.PostParams["Permission"]
+	local Group = a_Request.PostParams["Group"]
+
+	if (Permission == nil or Group == nil) then
+		return HTMLError("Bad request, missing parameters.")
+	end
+
+	cRankManager:RemovePermissionFromGroup(Permission, Group)
+
+	return "<p>Permission removed. <a href='/" .. a_Request.Path .. "?subpage=" .. "'>Return to group list</a>.</p>"
+end
+
 local g_SubpageHandlers =
 {
 	[""]			=		ShowMainPermissionsPage,
 	["show"]		=		ShowPluginOnlyPage,
 	["assign"]		=		AssignPermission,
 	["addperm"]		=		AddPermission,
+	["removeperm"]	=		RemovePermission,
 }
 
 function HandleRequest_ManageWebPermissions(a_Request)
