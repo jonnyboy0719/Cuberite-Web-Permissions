@@ -44,6 +44,10 @@ error_messages[0] = {
 	color = "black"
 }
 
+function HTMLError(a_Reason)
+	return "<b style='color: #a00'>" .. a_Reason .. "</b>"
+end
+
 function AssignButton(a_SubpageName, a_ButtonText, a_Permission, a_Permission_Table, a_RquestPath)
 	local EnableTable = false
 	local StringOnly = false
